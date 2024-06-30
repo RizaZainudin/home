@@ -1,159 +1,84 @@
-/*
-	Read Only by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
-*/
+jQuery(window).on('load', function() {
+	"use strict";
+    
+    
+    // HIDE PRELOADER
+    $(".preloader").addClass("hide-preloader");   
 
-(function($) {
+    
+});
 
-	var $window = $(window),
-		$body = $('body'),
-		$header = $('#header'),
-		$titleBar = null,
-		$nav = $('#nav'),
-		$wrapper = $('#wrapper');
 
-	// Breakpoints.
-		breakpoints({
-			xlarge:   [ '1281px',  '1680px' ],
-			large:    [ '1025px',  '1280px' ],
-			medium:   [ '737px',   '1024px' ],
-			small:    [ '481px',   '736px'  ],
-			xsmall:   [ null,      '480px'  ],
-		});
+jQuery(document).ready(function($) {
+	"use strict";
+    
+    
+    // INIT PARALLAX PLUGIN
+    $(".background-content.parallax-on").parallax({
+        scalarX: 24,
+        scalarY: 15,
+        frictionX: 0.1,
+        frictionY: 0.1,
+    });
+    
+    
+    // AJAX CONTACT FORM SUBMIT
+    $("#contact-form").submit(function(e) {
 
-	// Play initial animations on page load.
-		$window.on('load', function() {
-			window.setTimeout(function() {
-				$body.removeClass('is-preload');
-			}, 100);
-		});
+        e.preventDefault();
+        var postdata = $(this).serialize();
 
-	// Tweaks/fixes.
+        $.ajax({
 
-		// Polyfill: Object fit.
-			if (!browser.canUse('object-fit')) {
+            type: "POST",
+            url: "assets/php/contact.php",
+            data: postdata,
+            dataType: "json",
+            success: function(json) {
 
-				$('.image[data-position]').each(function() {
+                $("#contact-form input, #contact-form textarea").removeClass("error");
 
-					var $this = $(this),
-						$img = $this.children('img');
+                setTimeout(function(){
 
-					// Apply img as background.
-						$this
-							.css('background-image', 'url("' + $img.attr('src') + '")')
-							.css('background-position', $this.data('position'))
-							.css('background-size', 'cover')
-							.css('background-repeat', 'no-repeat');
+                    if (json.nameMessage !== "") {
 
-					// Hide img.
-						$img
-							.css('opacity', '0');
+                        $("#contact-form-name").addClass("error");
 
-				});
+                    }
 
-			}
+                    if (json.emailMessage !== "") {
 
-	// Header Panel.
+                        $("#contact-form-email").addClass("error");
 
-		// Nav.
-			var $nav_a = $nav.find('a');
+                    }
 
-			$nav_a
-				.addClass('scrolly')
-				.on('click', function() {
+                    if (json.messageMessage !== "") {
 
-					var $this = $(this);
+                        $("#contact-form-message").addClass("error");
 
-					// External link? Bail.
-						if ($this.attr('href').charAt(0) != '#')
-							return;
+                    }
 
-					// Deactivate all links.
-						$nav_a.removeClass('active');
+                }, 10);
 
-					// Activate link *and* lock it (so Scrollex doesn't try to activate other links as we're scrolling to this one's section).
-						$this
-							.addClass('active')
-							.addClass('active-locked');
+                if (json.nameMessage === "" && json.emailMessage === "" && json.messageMessage === "") {
 
-				})
-				.each(function() {
+                    $("#contact-form.error input, #contact-form.error textarea").removeClass("error");
+                    $('#contact-form').addClass("success");
+                    $('#contact-form textarea, #contact-form input').val("");
+                    
+                    setTimeout(function(){
+                        
+                        $('#contact-form').removeClass("success");
+                        
+                    },4000);
 
-					var	$this = $(this),
-						id = $this.attr('href'),
-						$section = $(id);
+                }
 
-					// No section for this link? Bail.
-						if ($section.length < 1)
-							return;
+            }
 
-					// Scrollex.
-						$section.scrollex({
-							mode: 'middle',
-							top: '5vh',
-							bottom: '5vh',
-							initialize: function() {
+        });
 
-								// Deactivate section.
-									$section.addClass('inactive');
-
-							},
-							enter: function() {
-
-								// Activate section.
-									$section.removeClass('inactive');
-
-								// No locked links? Deactivate all links and activate this section's one.
-									if ($nav_a.filter('.active-locked').length == 0) {
-
-										$nav_a.removeClass('active');
-										$this.addClass('active');
-
-									}
-
-								// Otherwise, if this section's link is the one that's locked, unlock it.
-									else if ($this.hasClass('active-locked'))
-										$this.removeClass('active-locked');
-
-							}
-						});
-
-				});
-
-		// Title Bar.
-			$titleBar = $(
-				'<div id="titleBar">' +
-					'<a href="#header" class="toggle"></a>' +
-					'<span class="title">' + $('#logo').html() + '</span>' +
-				'</div>'
-			)
-				.appendTo($body);
-
-		// Panel.
-			$header
-				.panel({
-					delay: 500,
-					hideOnClick: true,
-					hideOnSwipe: true,
-					resetScroll: true,
-					resetForms: true,
-					side: 'right',
-					target: $body,
-					visibleClass: 'header-visible'
-				});
-
-	// Scrolly.
-		$('.scrolly').scrolly({
-			speed: 1000,
-			offset: function() {
-
-				if (breakpoints.active('<=medium'))
-					return $titleBar.height();
-
-				return 0;
-
-			}
-		});
-
-})(jQuery);
+    });
+    
+        
+});
